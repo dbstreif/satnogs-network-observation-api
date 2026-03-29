@@ -41,11 +41,27 @@ pip install -e ".[dev]"
 ```python
 from satnogs_network_api import SatnogsNetworkClient
 
+# Anonymous (60 observation requests/hour)
 client = SatnogsNetworkClient()
 
+# Authenticated (240 observation requests/hour)
+client = SatnogsNetworkClient(token="your-api-token")
+
 for obs in client.observations.list(status="good", norad_cat_id=25544):
-    print(obs.id, obs.transmitter_mode, obs.center_frequency)
+    print(obs.id, obs.transmitter_mode, obs.observation_frequency)
 ```
+
+## Rate Limits
+
+All endpoints are publicly accessible without authentication. Providing a token increases the observation rate limit.
+
+| Endpoint | Anonymous | Authenticated |
+|---|---|---|
+| Observations | 60/hour | 240/hour |
+| Stations | 256/hour | — |
+| Transmitters | No known limit | — |
+
+The client automatically retries once on 429 (Too Many Requests), respecting the `Retry-After` header.
 
 ## API Reference
 
