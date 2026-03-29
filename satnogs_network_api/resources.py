@@ -199,7 +199,7 @@ class Transmitters:
         Returns:
             A Transmitter instance.
         """
-        url = f"{self._base_url}{uuid}/"
+        url = f"{self._base_url}{uuid}"
         response = self._session.get(url)
         response.raise_for_status()
         return Transmitter.model_validate(response.json())

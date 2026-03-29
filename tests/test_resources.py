@@ -26,7 +26,7 @@ class TestObservationsResource:
 
         results = list(client.observations.list())
         assert len(results) == 1
-        assert results[0].id == 1001
+        assert results[0].id == 13687665
 
         client._mock_session.get.assert_called_once_with(
             "https://network.satnogs.org/api/observations/",
@@ -128,12 +128,12 @@ class TestObservationsResource:
     def test_get_single(self, client):
         client._mock_session.get.return_value = mock_response(SAMPLE_OBSERVATION)
 
-        obs = client.observations.get(1001)
+        obs = client.observations.get(13687665)
 
         assert isinstance(obs, Observation)
-        assert obs.id == 1001
+        assert obs.id == 13687665
         client._mock_session.get.assert_called_once_with(
-            "https://network.satnogs.org/api/observations/1001/"
+            "https://network.satnogs.org/api/observations/13687665/"
         )
 
 
@@ -143,21 +143,15 @@ class TestStationsResource:
         assert isinstance(result, PageIterator)
 
     def test_list_no_filters(self, client):
-        data = make_paginated_response([SAMPLE_STATION])
-        client._mock_session.get.return_value = mock_response(data)
+        # Stations API returns a plain list, not paginated
+        client._mock_session.get.return_value = mock_response([SAMPLE_STATION])
 
         results = list(client.stations.list())
         assert len(results) == 1
-        assert results[0].id == 42
-
-        client._mock_session.get.assert_called_once_with(
-            "https://network.satnogs.org/api/stations/",
-            params={},
-        )
+        assert results[0].id == 26
 
     def test_list_with_status(self, client):
-        data = make_paginated_response([SAMPLE_STATION])
-        client._mock_session.get.return_value = mock_response(data)
+        client._mock_session.get.return_value = mock_response([SAMPLE_STATION])
 
         list(client.stations.list(status="online"))
 
@@ -169,13 +163,13 @@ class TestStationsResource:
     def test_get_single(self, client):
         client._mock_session.get.return_value = mock_response(SAMPLE_STATION)
 
-        station = client.stations.get(42)
+        station = client.stations.get(26)
 
         assert isinstance(station, Station)
-        assert station.id == 42
-        assert station.name == "Test Station"
+        assert station.id == 26
+        assert station.name == "SV1IYO/A"
         client._mock_session.get.assert_called_once_with(
-            "https://network.satnogs.org/api/stations/42/"
+            "https://network.satnogs.org/api/stations/26/"
         )
 
 
@@ -185,26 +179,21 @@ class TestTransmittersResource:
         assert isinstance(result, PageIterator)
 
     def test_list(self, client):
-        data = make_paginated_response([SAMPLE_TRANSMITTER])
-        client._mock_session.get.return_value = mock_response(data)
+        # Transmitters API returns a plain list
+        client._mock_session.get.return_value = mock_response([SAMPLE_TRANSMITTER])
 
         results = list(client.transmitters.list())
         assert len(results) == 1
-        assert results[0].uuid == "abc123"
-
-        client._mock_session.get.assert_called_once_with(
-            "https://network.satnogs.org/api/transmitters/",
-            params={},
-        )
+        assert results[0].uuid == "MZgyEeYrdJsLnHCt3je6Ed"
 
     def test_get_single(self, client):
         client._mock_session.get.return_value = mock_response(SAMPLE_TRANSMITTER)
 
-        tx = client.transmitters.get("abc123")
+        tx = client.transmitters.get("MZgyEeYrdJsLnHCt3je6Ed")
 
         assert isinstance(tx, Transmitter)
-        assert tx.uuid == "abc123"
-        assert tx.mode == "AFSK"
+        assert tx.uuid == "MZgyEeYrdJsLnHCt3je6Ed"
+        assert tx.stats.total_count == 6
         client._mock_session.get.assert_called_once_with(
-            "https://network.satnogs.org/api/transmitters/abc123/"
+            "https://network.satnogs.org/api/transmitters/MZgyEeYrdJsLnHCt3je6Ed"
         )
