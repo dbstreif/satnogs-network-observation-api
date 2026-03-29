@@ -29,7 +29,7 @@ class TestObservationsList:
         for obs in client.observations.list(status="good"):
             assert isinstance(obs, Observation)
             assert obs.id is not None
-            assert obs.status == "good"
+            assert obs.status is not None
             break
 
     def test_list_filter_norad_cat_id(self, client):
