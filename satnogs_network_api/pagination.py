@@ -1,7 +1,7 @@
 """Lazy cursor-based pagination for the SatNOGS Network API."""
 
-from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
-from urllib.parse import parse_qs, urlparse
+import re
+from typing import Any, Dict, Iterator, List, Optional, Type, TypeVar
 
 import requests
 
@@ -45,6 +45,15 @@ class PageIterator(Iterator[T]):
         clone._raw_mode = True
         return clone
 
+    @staticmethod
+    def _parse_link_next(link_header: str) -> Optional[str]:
+        """Extract the next URL from a Link header."""
+        for part in link_header.split(","):
+            match = re.match(r'\s*<([^>]+)>\s*;\s*rel="next"', part.strip())
+            if match:
+                return match.group(1)
+        return None
+
     def _fetch_page(self) -> None:
         if self._next_url is None:
             self._exhausted = True
@@ -60,7 +69,9 @@ class PageIterator(Iterator[T]):
             self._next_params = None
         elif isinstance(data, list):
             self._buffer = data
-            self._next_url = None
+            # Check Link header for cursor-based pagination
+            link_header = response.headers.get("Link", "")
+            self._next_url = self._parse_link_next(link_header)
             self._next_params = None
         else:
             self._buffer = []

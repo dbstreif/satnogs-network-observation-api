@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, call
 from satnogs_network_api.models import Observation
 from satnogs_network_api.pagination import PageIterator
 
-from tests.conftest import SAMPLE_OBSERVATION, make_paginated_response, mock_response
+from tests.conftest import SAMPLE_OBSERVATION, SAMPLE_STATION, make_paginated_response, mock_response
 
 
 class TestPageIterator:
@@ -27,7 +27,7 @@ class TestPageIterator:
 
         assert len(results) == 1
         assert isinstance(results[0], Observation)
-        assert results[0].id == 1001
+        assert results[0].id == SAMPLE_OBSERVATION["id"]
 
     def test_multiple_pages(self):
         session = MagicMock()
@@ -69,7 +69,7 @@ class TestPageIterator:
         results = list(it)
 
         assert len(results) == 1
-        assert results[0].id == 1001
+        assert results[0].id == SAMPLE_OBSERVATION["id"]
 
     def test_lazy_fetching(self):
         """Pages are only fetched when iterated."""
@@ -144,6 +144,44 @@ class TestPageIterator:
         # Second call uses the next URL with no params
         session.get.assert_called_with(next_url, params=None)
 
+    def test_link_header_pagination(self):
+        """List responses use the Link header for pagination."""
+        session = MagicMock()
+        obs1 = {**SAMPLE_OBSERVATION, "id": 1}
+        obs2 = {**SAMPLE_OBSERVATION, "id": 2}
+
+        next_url = "https://example.com/api/?cursor=abc123&status=good"
+
+        resp1 = mock_response([obs1])
+        resp1.headers = {"Link": f'<{next_url}>; rel="next"'}
+
+        resp2 = mock_response([obs2])
+        resp2.headers = {}
+
+        session.get.side_effect = [resp1, resp2]
+
+        it = self._make_iterator(session)
+        results = list(it)
+
+        assert len(results) == 2
+        assert results[0].id == 1
+        assert results[1].id == 2
+        assert session.get.call_count == 2
+        session.get.assert_called_with(next_url, params=None)
+
+    def test_link_header_no_next(self):
+        """List response without Link next stops after one page."""
+        session = MagicMock()
+        resp = mock_response([SAMPLE_OBSERVATION])
+        resp.headers = {}
+        session.get.return_value = resp
+
+        it = self._make_iterator(session)
+        results = list(it)
+
+        assert len(results) == 1
+        assert session.get.call_count == 1
+
     def test_stopiteration_on_exhausted(self):
         session = MagicMock()
         data = make_paginated_response([SAMPLE_OBSERVATION])
@@ -175,7 +213,7 @@ class TestPageIteratorJsonMode:
         results = list(it.json())
         assert len(results) == 1
         assert isinstance(results[0], dict)
-        assert results[0]["id"] == 1001
+        assert results[0]["id"] == SAMPLE_OBSERVATION["id"]
 
     def test_json_does_not_affect_original(self):
         session = MagicMock()
