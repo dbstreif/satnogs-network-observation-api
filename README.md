@@ -1,4 +1,4 @@
-# satnogs-network-observation-api
+# satnogs-network-observation-api-client
 
 Python client wrapper for the [SatNOGS Network](https://network.satnogs.org) Observation API.
 
