@@ -1,17 +1,21 @@
 # satnogs-network-observation-api-client
 
+[![PyPI](https://img.shields.io/pypi/v/satnogs-network-api)](https://pypi.org/project/satnogs-network-api/)
+
 Python client wrapper for the [SatNOGS Network](https://network.satnogs.org) Observation API.
 
 Provides typed access to satellite observations, ground stations, and transmitters with lazy cursor-based pagination.
 
-Source API: [SatNOGS Network GitLab](https://gitlab.com/librespacefoundation/satnogs/satnogs-network)
+- **Source API:** [SatNOGS Network GitLab](https://gitlab.com/librespacefoundation/satnogs/satnogs-network)
+- **Repository:** [GitHub](https://github.com/dbstreif/satnogs-network-observation-api-client)
+- **PyPI:** [satnogs-network-api](https://pypi.org/project/satnogs-network-api/)
 
 ## Installation
 
-### From wheel (recommended)
+### From PyPI (recommended)
 
 ```bash
-pip install dist/satnogs_network_api-0.1.0-py3-none-any.whl
+pip install satnogs-network-api
 ```
 
 ### From source
